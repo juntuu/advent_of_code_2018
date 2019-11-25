@@ -20,3 +20,18 @@ for two, three in map(counts, ids):
 checksum = twos * threes
 print('Day 2, part 2:', checksum)
 
+
+def similar(needle, haystack, differences=1):
+	for straw in haystack:
+		diff = sum(a != b for a, b in zip(needle, straw))
+		if diff == differences:
+			return straw
+
+
+for i, line in enumerate(ids):
+	other = similar(line, ids[i:])
+	if other:
+		letters = ''.join(c for i, c in enumerate(line) if other[i] == c)
+		print('Day 2, part 2:', letters)
+		break
+
