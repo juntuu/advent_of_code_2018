@@ -33,3 +33,13 @@ for claim in claims:
 overlap = sum(1 for v in fabric.values() if len(v) > 1)
 print('Day 3, part 1:', overlap)
 
+
+all_claims = set(claim.id for claim in claims)
+
+for made_claims in fabric.values():
+	if len(made_claims) > 1:
+		all_claims -= made_claims
+
+assert len(all_claims) == 1
+print('Day 3, part 2:', *all_claims)
+
