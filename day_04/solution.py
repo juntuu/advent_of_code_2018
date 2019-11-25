@@ -43,3 +43,11 @@ minute, _ = histogram.most_common(1)[0]
 
 print('Day 4, part 1:', minute * most_sleepy[1])
 
+
+histogram = Counter()
+for guard, sleep in sleeping_guards.items():
+	histogram.update((guard, minute) for nap in sleep for minute in nap)
+
+(guard, minute), _ = histogram.most_common(1)[0]
+print('Day 4, part 2:', minute * guard)
+
