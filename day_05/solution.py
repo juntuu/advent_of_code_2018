@@ -28,3 +28,13 @@ def react(polymer):
 reacted = react(polymer)
 print('Day 5, part 1:', len(reacted))
 
+
+units = set(map(abs, reacted))
+record = len(reacted)
+for unit in units:
+	candidate = react([e for e in reacted if abs(e) != unit])
+	if len(candidate) < record:
+		record = len(candidate)
+
+print('Day 5, part 2:', record)
+
