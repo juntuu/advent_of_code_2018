@@ -1,5 +1,5 @@
 
-from collections import namedtuple, Counter
+from collections import namedtuple, defaultdict
 
 
 class Claim(namedtuple('Claim', ['id', 'x', 'y', 'w', 'h'])):
@@ -25,10 +25,11 @@ class Claim(namedtuple('Claim', ['id', 'x', 'y', 'w', 'h'])):
 with open('input.txt') as f:
 	claims = [Claim(line) for line in f]
 
-fabric = Counter()
+fabric = defaultdict(set)
 for claim in claims:
-	fabric.update(claim.squares())
+	for square in claim.squares():
+		fabric[square].add(claim.id)
 
-overlap = sum(1 for v in fabric.values() if v > 1)
+overlap = sum(1 for v in fabric.values() if len(v) > 1)
 print('Day 3, part 1:', overlap)
 
