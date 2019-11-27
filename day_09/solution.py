@@ -1,6 +1,39 @@
 from collections import Counter
 
 
+class List:
+	__slots__ = ('value', 'next', 'prev')
+
+	def __init__(self, v, n=None, p=None):
+		self.value = v
+		self.next = n or self
+		self.prev = p or self
+
+	def insert(self, val):
+		new = List(val, self.next, self)
+		self.next.prev = new
+		self.next = new
+		return new
+
+	def remove(self):
+		self.prev.next = self.next
+		self.next.prev = self.prev
+		return self
+
+	def to_str(self, current=None):
+		res = ''
+		at = self
+		while True:
+			if at is current:
+				res += f'({at.value:2})'
+			else:
+				res += f'{at.value:3} '
+			at = at.next
+			if at is self:
+				break
+		return res
+
+
 def high_score(players, last_marble):
 	'''
 	10 players; last marble is worth 1618 points: high score is 8317
@@ -22,18 +55,17 @@ def high_score(players, last_marble):
 	32
 	'''
 	scores = Counter()
-	marbles = [0]
-	current = 0
+	marbles = List(0)
+	current = marbles
 	for marble in range(1, last_marble + 1):
 		if marble % 23 == 0:
-			remove = (current + len(marbles) - 7) % len(marbles)
-			removed = marbles.pop(remove)
-			current = remove
+			for _ in range(7):
+				current = current.prev
 			elf = marble % players
-			scores[elf] += marble + removed
+			scores[elf] += marble + current.value
+			current = current.remove().next
 		else:
-			current = (current + 1) % len(marbles) + 1
-			marbles.insert(current, marble)
+			current = current.next.insert(marble)
 	return scores.most_common(1)[0][1]
 
 
@@ -42,4 +74,6 @@ def high_score(players, last_marble):
 players, last_marble = 441, 71032
 
 print('Day 9, part 1:', high_score(players, last_marble))
+
+print('Day 9, part 2:', high_score(players, last_marble * 100))
 
