@@ -26,3 +26,21 @@ for x in range(min(xs), max(xs) + 1):
 point, count = Counter(space.values()).most_common(1)[0]
 print('Day 6, part 1:', count)
 
+
+# limit = 30  # for example data
+limit = 10000
+
+count = 0
+for x in range(min(xs), max(xs) + 1):
+	for y in range(min(ys), max(ys) + 1):
+		p = (x, y)
+		distance = 0
+		for d in map(manhattan_to(p), points):
+			distance += d
+			if distance > limit:
+				break
+		else:
+			count += 1
+
+print('Day 6, part 2:', count)
+
