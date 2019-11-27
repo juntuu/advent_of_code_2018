@@ -1,6 +1,9 @@
 
+const message = 'EKALLKLB'
+const msg_second = 10227
 
 const points = []
+let second = 0
 
 const advance = k => {
 	let minx = 0
@@ -64,5 +67,6 @@ input.split('\n').forEach(line => {
 	}
 })
 
+advance(msg_second)
 window.requestAnimationFrame(draw)
 
