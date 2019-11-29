@@ -17,22 +17,53 @@ def power_level(x, y, serial):
 	return ((rack_id * y + serial) * rack_id) // 100 % 10 - 5
 
 
-def area_power(x, y, serial):
-	return sum(power_level(x+i, y+j, serial) for i in range(3) for j in range(3))
+def area_power(x, y, z, serial, cache):
+	power = cache.get((x, y, z))
+	if power is not None:
+		return power
+
+	if z < 4:
+		power = sum(power_level(x+i, y+j, serial) for i in range(z) for j in range(z))
+		cache[(x, y, z)] = power
+
+	k, i = divmod(z, 2)
+	if i == 0:
+		power = area_power(x, y, k, serial, cache)
+		power += area_power(x + k, y, k, serial, cache)
+		power += area_power(x, y + k, k, serial, cache)
+		power += area_power(x + k, y + k, k, serial, cache)
+	else:
+		power = area_power(x, y, k + i, serial, cache)
+		power += area_power(x + k + i, y, k, serial, cache)
+		power += area_power(x, y + k + i, k, serial, cache)
+		power += area_power(x + k, y + k, k + i, serial, cache)
+		power -= area_power(x + k, y + k, i, serial, cache)
+
+	cache[(x, y, z)] = power
+	return power
 
 
-def max_power_at(serial):
-	_, xy = max(
-			(area_power(x, y, serial), (x, y))
-			for x in range(1, grid_size - 2)
-			for y in range(1, grid_size - 2))
-	return xy
+def max_power_at(serial, sub_range=(3,)):
+	cache = {}
+	powers = []
+
+	for z in sub_range:
+		powers.append(max(
+			(area_power(x, y, z, serial, cache), (x, y, z))
+			for x in range(1, grid_size - (z - 2))
+			for y in range(1, grid_size - (z - 2))))
+	_, xyz = max(powers)
+	return xyz
 
 
-assert max_power_at(42) == (21, 61)
+assert max_power_at(42)[:2] == (21, 61)
 
-x, y = max_power_at(grid_serial)
+x, y, _ = max_power_at(grid_serial)
 print(f'Day 11, part 1: {x},{y}')
 
+assert max_power_at(18, range(1, grid_size + 1)) == (90, 269, 16)
+assert max_power_at(42, range(1, grid_size + 1)) == (232, 251, 12)
 
+x, y, z = max_power_at(grid_serial, range(1, grid_size + 1))
+print(f'Day 11, part 2: {x},{y},{z}')
 
