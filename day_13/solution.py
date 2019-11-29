@@ -3,8 +3,9 @@ from itertools import cycle
 
 
 class Collision(Exception):
-	def __init__(self, pos):
+	def __init__(self, pos, *carts):
 		self.pos = pos
+		self.carts = carts
 
 	def __repr__(self):
 		y, x = self.pos
@@ -12,7 +13,7 @@ class Collision(Exception):
 
 
 class Cart:
-	positions = set()
+	positions = {}
 	turn = '<v>^<^'
 	corner = {
 			'</': 'v',
@@ -30,13 +31,13 @@ class Cart:
 		self.x = x
 		self.y = y
 		self.c = direction
-		Cart.positions.add(self.position)
+		Cart.positions[self.position] = self
 
 	def __repr__(self):
 		return f'Cart({self.c}, {self.position})'
 
 	def advance(self, track):
-		Cart.positions.discard(self.position)
+		Cart.positions.pop(self.position, None)
 		if self.c == '<':
 			self.x -= 1
 		elif self.c == '>':
@@ -50,9 +51,11 @@ class Cart:
 			self.c = Cart.turn[Cart.turn.find(self.c) + next(self.turns)]
 		elif at:
 			self.c = Cart.corner[self.c + at]
-		if self.position in Cart.positions:
-			raise Collision(self.position)
-		Cart.positions.add(self.position)
+		other = Cart.positions.get(self.position)
+		if other is not None:
+			Cart.positions.pop(self.position)
+			raise Collision(self.position, self, other)
+		Cart.positions[self.position] = self
 
 	@property
 	def position(self):
@@ -76,12 +79,26 @@ with open('input.txt') as f:
 				track[(y, x)] = c
 
 
-try:
-	while True:
-			carts.sort()
-			for cart in carts:
-				cart.advance(track)
-except Collision as e:
-	y, x = e.pos
-	print(f'Day 13, part 1: {x},{y}')
+first = True
+while carts:
+	if len(carts) == 1:
+		y, x = carts[0].position
+		print(f'Day 13, part 2: {x},{y}')
+		break
+	carts.sort()
+	i = 0
+	while i < len(carts):
+		try:
+			carts[i].advance(track)
+			i += 1
+		except Collision as e:
+			y, x = e.pos
+			for cart in e.carts:
+				j = carts.index(cart)
+				if j < i:
+					i -= 1
+				carts.pop(j)
+			if first:
+				print(f'Day 13, part 1: {x},{y}')
+				first = False
 
