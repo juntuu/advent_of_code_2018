@@ -5,24 +5,25 @@ typedef struct {
 	int data[4];
 } Registers;
 
+#define RESOLVED_OPCODES
 typedef enum {/*{{{*/
-	addr,
-	addi,
-	mulr,
-	muli,
-	banr,
-	bani,
-	borr,
-	bori,
-	setr,
-	seti,
-	gtir,
-	gtri,
-	gtrr,
-	eqir,
-	eqri,
-	eqrr,
-	N_OPCODES,
+	addr = 12,
+	addi = 14,
+	mulr = 7,
+	muli = 3,
+	banr = 10,
+	bani = 15,
+	borr = 5,
+	bori = 6,
+	setr = 0,
+	seti = 9,
+	gtir = 13,
+	gtri = 2,
+	gtrr = 8,
+	eqir = 4,
+	eqri = 11,
+	eqrr = 1,
+	N_OPCODES = 16,
 } Opcode;/*}}}*/
 
 typedef struct {/*{{{*/
@@ -154,6 +155,10 @@ int main(int argc, char **argv) {/*{{{*/
 	}
 	printf("Day 16, part 1: %d\n", matches);
 
+#ifdef RESOLVED_OPCODES
+#define RESOLVE(x) x
+#else
+#define RESOLVE(x) true_mapping[x]
 	int true_mapping[N_OPCODES];
 	for (int known = 0; known < N_OPCODES;) {
 		for (int i = 0; i < N_OPCODES; i++) {
@@ -179,10 +184,11 @@ int main(int argc, char **argv) {/*{{{*/
 		rev_mappings[true_mapping[i]] = i;
 	for (int i = 0; i < N_OPCODES; i++)
 		printf("%2d -> %2d\n", i, rev_mappings[i]);
+#endif
 
 	Registers reg = {};
 	while (4 == fscanf(f, "%d %d %d %d\n", vs, vs+1, vs+2, vs+3)) {
-		Instruction i = {true_mapping[vs[0]], vs[1], vs[2], vs[3]};
+		Instruction i = {RESOLVE(vs[0]), vs[1], vs[2], vs[3]};
 		excecute(i, &reg);
 	}
 	fclose(f);
