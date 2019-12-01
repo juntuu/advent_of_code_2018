@@ -43,6 +43,9 @@ def step(yard):
 
 
 minutes = 10
+more_minutes = 1000000000
+value_at_minutes = None
+value_at_more_minutes = None
 
 
 def value(yard):
@@ -52,24 +55,62 @@ def value(yard):
 
 def vis(scr):
 	global yard
+	global value_at_minutes
+	global value_at_more_minutes
 	curses.curs_set(False)
-	for minute in range(minutes + 1):
-		scr.clear()
-		scr.addstr(0, 0, f'After {minute:2} minute{"" if minute == 1 else "s"}: {value(yard)}')
-		for i, row in enumerate(yard):
-			if i + 1 >= curses.LINES:
-				break
-			scr.addstr(i + 1, 0, row[:curses.COLS])
-
-		scr.refresh()
+	n = Counter()
+	max_n = 0
+	cl = [0]
+	values = []
+	for minute in range(more_minutes + 1):
+		s = ''.join(yard)
+		if n[s] > max_n:
+			if len(cl) > 1 and cl[-1] == cl[-2]:
+				values = values[-cl[-1]:]
+				diff = more_minutes - minute
+				value_at_more_minutes = values[diff % len(values)]
+			max_n = n[s]
+			cl.append(0)
+		if n[s] == max_n:
+			cl[-1] += 1
+		n[s] += 1
+		values.append(value(yard))
 		if minute == minutes:
-			scr.addstr(1, 0, '<press any key to exit> ')
+			value_at_minutes = values[-1]
+
+		if minute <= minutes:
+			time.sleep(0.2)
+		if minute % 4 == 0 or minute < minutes or n.most_common(1)[0][1] > 1:
+			scr.clear()
+			scr.addstr(0, 0, f'After {minute:2} minute{"" if minute == 1 else "s"}: value = {value(yard)}, cycle lengths = {cl}')
+			for i, row in enumerate(yard):
+				if i + 1 >= curses.LINES:
+					break
+				scr.addstr(i + 1, 0, row[:curses.COLS])
+			scr.refresh()
+
+		if value_at_more_minutes is not None:
+			s1 = f'found value at {more_minutes}: {value_at_more_minutes}'
+			s2 = 'press any key to exit'
+			length = max(len(s1), len(s2))
+			scr.addstr(1, 0, f'{s1.ljust(length)} *  ')
+			scr.addstr(2, 0, f'{s2.ljust(length)} *  ')
+			scr.addstr(3, 0, '*' * length + '**  ')
+			scr.addstr(4, 0, ' ' * length + '    ')
+			scr.refresh()
 			scr.getkey()
 			break
+
 		yard = step(yard)
-		time.sleep(0.5)
 
 
-curses.wrapper(vis)
-print('Day 18, part 1:', value(yard))
+try:
+	curses.wrapper(vis)
+except KeyboardInterrupt:
+	pass
+
+if value_at_minutes is not None:
+	print('Day 18, part 1:', value_at_minutes)
+if value_at_more_minutes is not None:
+	print('Day 18, part 2:', value_at_more_minutes)
 
