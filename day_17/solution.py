@@ -126,3 +126,6 @@ except KeyboardInterrupt:
 total_wet = sum(1 for (_, y) in wet | water if min_y <= y <= max_y)
 print('Day 17, part 1:', total_wet)
 
+total_water = sum(1 for (_, y) in water if min_y <= y <= max_y)
+print('Day 17, part 2:', total_water)
+
