@@ -145,6 +145,15 @@ int most_doors(Map *m) {
 	return max + 1;
 }
 
+int further_than(Map *m, int n) {
+	if (!m) return 0;
+	int total = n <= 0;
+	for (int i = 0; i < 4; i++) {
+		total += further_than(m->doors[i], n - 1);
+	}
+	return total;
+}
+
 int main(int argc, char **argv) {
 	int verbose = 0;
 	FILE *f = stdin;
@@ -187,5 +196,6 @@ int main(int argc, char **argv) {
 	build_map(regex, &m);
 	if (verbose) print_map(&m);
 	printf("Day 20, part 1: %d\n", most_doors(&m));
+	printf("Day 20, part 2: %d\n", further_than(&m, 1000));
 }
 
