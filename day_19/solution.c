@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include <locale.h>
+#include <ncurses.h>
+
+typedef unsigned long T;
 typedef struct {
-	int data[6];
+	T data[6];
 } Registers;
 
 typedef enum {/*{{{*/
@@ -75,7 +80,7 @@ typedef struct {/*{{{*/
 } Program;/*}}}*/
 
 int excecute(Instruction i, Registers *r) {/*{{{*/
-	int *reg = r->data;
+	T *reg = r->data;
 	switch (i.opcode) {/*{{{*/
 		/* Addition:{{{
 		 * addr stores into r C the result of adding r A and r B.
@@ -146,19 +151,75 @@ int excecute(Instruction i, Registers *r) {/*{{{*/
 
 unsigned long run(Program p, Registers *r) {/*{{{*/
 	unsigned long cycles = 0;
-	int ip_;
-	int *ip = &ip_;
+	T ip_;
+	T *ip = &ip_;
 	if (p.bound_register >= 0) {
 		ip = &r->data[p.bound_register];
 	}
 	*ip = 0;
-	while (0 <= *ip && *ip < p.n) {
+	unsigned limit = p.n;
+	while (0 <= *ip && *ip < limit) {
 		excecute(p.i[*ip], r);
 		(*ip)++;
 		cycles++;
 	}
 	if (cycles > 0) (*ip)--;
 	return cycles;
+}/*}}}*/
+
+void step(Program p, Registers *r, char **source) {/*{{{*/
+	setlocale(LC_ALL, "");
+	initscr(); cbreak(); noecho();
+	WINDOW *code = newpad(p.n, 20);
+	WINDOW *out = newwin(0, COLS - 20, 0, 20);
+	scrollok(out, TRUE);
+
+	unsigned long cycles = 0;
+	T ip_;
+	T *ip = &ip_;
+	if (p.bound_register >= 0)
+		ip = &r->data[p.bound_register];
+	*ip = 0;
+	T last_ip = *ip;
+	int p_top = 0;
+	int p_draw = 1;
+	unsigned limit = p.n;
+	while (0 <= *ip && *ip < limit) {
+		wattroff(code, A_STANDOUT);
+		mvwprintw(code, last_ip, 0, "%3u: %s", last_ip, source[last_ip]);
+		wattron(code, A_STANDOUT);
+		mvwprintw(code, *ip, 0, "%3u: %s", *ip, source[*ip]);
+		if ((int)*ip >= (p_top + LINES - 4)) {
+			p_top = *ip - (LINES / 2);
+			if (p_top > (int)p.n - LINES)
+				p_top = (int) p.n - LINES;
+			p_draw = 1;
+		} else if ((int)*ip < p_top + 4) {
+			p_top = *ip - (LINES / 2);
+			if (p_top < 0) p_top = 0;
+			p_draw = 1;
+		}
+		if (p_draw) {
+			for (int i = p_top; i < LINES + p_top; i++) {
+				if (i == (int)*ip)
+					wattron(code, A_STANDOUT);
+				else wattroff(code, A_STANDOUT);
+				mvwprintw(code, i, 0, "%3u: %s", i, source[i]);
+			}
+		}
+		prefresh(code, p_top, 0, 0, 0, LINES - 1, 32);
+		wprintw(out, "%8lu %8lu %8lu %8lu %8lu %8lu\n", r->data[0], r->data[1], r->data[2], r->data[3], r->data[4], r->data[5]);
+		wrefresh(out);
+		if (wgetch(out) == 'q') goto done;
+
+		last_ip = *ip;
+		excecute(p.i[*ip], r);
+		(*ip)++;
+		cycles++;
+	}
+	if (cycles > 0) (*ip)--;
+done:
+	endwin();
 }/*}}}*/
 
 Program read_program(FILE *f) {/*{{{*/
@@ -210,6 +271,27 @@ Program read_program(FILE *f) {/*{{{*/
 	return p;
 }/*}}}*/
 
+char **read_source(FILE *f, int n_lines) {/*{{{*/
+	char **lines = calloc(n_lines, sizeof(char*));
+	if (!lines) return NULL;
+	int i = 0;
+	while (i < n_lines) {
+		size_t c = 0;
+		int n = getline(lines+i, &c, f);
+		if (n <= 0) goto error;
+		if (lines[i][0] == '#')
+			continue;
+		if (lines[i][n-1] == '\n')
+			lines[i][n-1] = '\0';
+		i++;
+	}
+	return lines;
+error:
+	while (i--) free(lines[i]);
+	free(lines);
+	return NULL;
+}/*}}}*/
+
 int main(int argc, char **argv) {/*{{{*/
 	FILE *f = stdin;/*{{{*/
 	if (argc > 1) {
@@ -221,6 +303,8 @@ int main(int argc, char **argv) {/*{{{*/
 	}/*}}}*/
 
 	Program p = read_program(f);
+	rewind(f);
+	char **source = read_source(f, p.n);
 	fclose(f);
 
 	if (!p.i) {
@@ -230,8 +314,18 @@ int main(int argc, char **argv) {/*{{{*/
 
 	Registers r = {};
 	run(p, &r);
-	printf("Day 19, part 1: %d\n", r.data[0]);
+	printf("Day 19, part 1: %lu\n", r.data[0]);
 
+	memset(r.data, 0, sizeof(r.data));
+	r.data[0] = 1;
+	step(p, &r, source);
+
+	printf("Day 19, part 1: %lu\n", r.data[0]);
+
+	if (source) {
+		while (p.n--) free(source[p.n]);
+		free(source);
+	}
 	free(p.i);
 }/*}}}*/
 
