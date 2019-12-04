@@ -1,39 +1,79 @@
-#ip 3
+/* #ip 3 */
 
-addi 3 16 3
-seti 1 5 1
-seti 1 4 4
-mulr 1 4 5
-eqrr 5 2 5
-addr 5 3 3
-addi 3 1 3
-addr 1 0 0
-addi 4 1 4
-gtrr 4 2 5
-addr 3 5 3
-seti 2 6 3
-addi 1 1 1
-gtrr 1 2 5
-addr 5 3 3
-seti 1 1 3
-mulr 3 3 3
-addi 2 2 2
-mulr 2 2 2
-mulr 3 2 2
-muli 2 11 2
-addi 5 3 5
-mulr 5 3 5
-addi 5 3 5
-addr 2 5 2
-addr 3 0 3
-seti 0 6 3
-setr 3 8 5
-mulr 5 3 5
-addr 3 5 5
-mulr 3 5 5
-muli 5 14 5
-mulr 5 3 5
-addr 2 5 2
-seti 0 2 0
-seti 0 2 3
+typedef unsigned long T;
+
+T program(T *r) {
+ip_0:
+	r[3] = r[3] + 16;
+ip_1:
+	r[1] = 1;
+ip_2:
+	r[4] = 1;
+ip_3:
+	r[5] = r[1] * r[4];
+ip_4:
+	r[5] = r[5] == r[2];
+ip_5:
+	r[3] = r[5] + r[3];
+ip_6:
+	r[3] = r[3] + 1;
+ip_7:
+	r[0] = r[1] + r[0];
+ip_8:
+	r[4] = r[4] + 1;
+ip_9:
+	r[5] = r[4] > r[2];
+ip_10:
+	r[3] = r[3] + r[5];
+ip_11:
+	r[3] = 2;
+ip_12:
+	r[1] = r[1] + 1;
+ip_13:
+	r[5] = r[1] > r[2];
+ip_14:
+	r[3] = r[5] + r[3];
+ip_15:
+	r[3] = 1;
+ip_16:
+	r[3] = r[3] * r[3];
+ip_17:
+	r[2] = r[2] + 2;
+ip_18:
+	r[2] = r[2] * r[2];
+ip_19:
+	r[2] = r[3] * r[2];
+ip_20:
+	r[2] = r[2] * 11;
+ip_21:
+	r[5] = r[5] + 3;
+ip_22:
+	r[5] = r[5] * r[3];
+ip_23:
+	r[5] = r[5] + 3;
+ip_24:
+	r[2] = r[2] + r[5];
+ip_25:
+	r[3] = r[3] + r[0];
+ip_26:
+	r[3] = 0;
+ip_27:
+	r[5] = r[3];
+ip_28:
+	r[5] = r[5] * r[3];
+ip_29:
+	r[5] = r[3] + r[5];
+ip_30:
+	r[5] = r[3] * r[5];
+ip_31:
+	r[5] = r[5] * 14;
+ip_32:
+	r[5] = r[5] * r[3];
+ip_33:
+	r[2] = r[2] + r[5];
+ip_34:
+	r[0] = 0;
+ip_35:
+	r[3] = 0;
+}
 
