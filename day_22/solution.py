@@ -2,6 +2,7 @@
 from collections import namedtuple, defaultdict
 import math
 import heapq
+import sys
 
 
 class GeoMap:
@@ -9,13 +10,24 @@ class GeoMap:
 		self.map = {(0, 0): 0, target: 0}
 		self.depth = depth
 		self.target = target
+		self.max_x, self.max_y = target
 
 	def __getitem__(self, i):
 		return self.erosion(i) % 3
 
+	def as_grid(self):
+		grid = []
+		for y in range(self.max_y + 1):
+			grid.append([])
+			for x in range(self.max_x + 1):
+				grid[-1].append(self[x, y])
+		return grid
+
 	def erosion(self, i):
 		if i not in self.map:
 			x, y = i
+			self.max_x = max(x, self.max_x)
+			self.max_y = max(y, self.max_y)
 			if y == 0:
 				self.map[i] = x * 16807
 			elif x == 0:
@@ -23,15 +35,6 @@ class GeoMap:
 			else:
 				self.map[i] = self.erosion((x - 1, y)) * self.erosion((x, y - 1))
 		return (self.map[i] + self.depth) % 20183
-
-
-depth = 3339
-x = 10
-y = 715
-
-geo_map = GeoMap(depth, (x, y))
-total = sum(geo_map[i, j] for i in range(x + 1) for j in range(y + 1))
-print("Day 22, part 1: ", total)
 
 
 class PriorityQ:
@@ -89,6 +92,12 @@ def a_star(start, goal, h, neighbors):
 				open_set.push(neighbor)
 
 
+depth = 3339
+x = 10
+y = 715
+
+geo_map = GeoMap(depth, (x, y))
+
 Node = namedtuple('Node', ['x', 'y', 'gear'])
 start = Node(0, 0, 'torch')
 goal = Node(x, y, 'torch')
@@ -114,6 +123,38 @@ def neighbors(node):
 			yield Node(xi, yi, gear), 1
 
 
+def print_path(path):
+	grid = geo_map.as_grid()
+	chars = {
+			0: ' .',
+			1: ' =',
+			2: ' |',
+			'torch': 'T',
+			'climbing': 'C',
+			'neither': 'N',
+			}
+	for yi in range(len(grid)):
+		for xi in range(len(grid[0])):
+			grid[yi][xi] = list(chars[grid[yi][xi]])
+	grid[0][0].append('S')
+
+	max_x = max_y = 0
+	for xi, yi, tool in path:
+		max_x = max(max_x, xi)
+		max_y = max(max_y, yi)
+		grid[yi][xi].append(chars[tool])
+
+	grid[y][x].append('G')
+	for row in grid[:max_y+1]:
+		print(''.join(''.join(e[-2:]) for e in row[:max_x+1]))
+
+
+total = sum(geo_map[i, j] for i in range(x + 1) for j in range(y + 1))
 cost, path = a_star(start, goal, heuristic, neighbors)
+
+if '--path' in sys.argv:
+	print_path(path)
+
+print("Day 22, part 1: ", total)
 print("Day 22, part 2: ", cost)
 
