@@ -5,6 +5,8 @@
 #include <locale.h>
 #include <ncurses.h>
 
+#include "program.c"
+
 typedef unsigned long T;
 typedef struct {
 	T data[6];
@@ -316,11 +318,12 @@ int main(int argc, char **argv) {/*{{{*/
 	run(p, &r);
 	printf("Day 19, part 1: %lu\n", r.data[0]);
 
+
 	memset(r.data, 0, sizeof(r.data));
 	r.data[0] = 1;
 	step(p, &r, source);
 
-	printf("Day 19, part 1: %lu\n", r.data[0]);
+	printf("Day 19, part 1: %lu\n", program(1));
 
 	if (source) {
 		while (p.n--) free(source[p.n]);
