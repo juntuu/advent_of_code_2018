@@ -3,44 +3,37 @@
 typedef unsigned long T;
 
 T program(T *r) {
-	r[2] = r[2] + 2;
-	r[2] = r[2] * r[2];
-	r[2] = 19 * r[2];
-	r[2] = r[2] * 11;
-	r[5] = r[5] + 3;
-	r[5] = r[5] * 22;
-	r[5] = r[5] + 3;
-	r[2] = r[2] + r[5];
+	T n = r[2] + 2;
+	n *= n;
+	n *= 19;
+	n *= 11;
+
+	T temp = r[5] + 3;
+	temp *= 22;
+	temp += 3;
+	n += temp;
 
 	if (r[0]) {
-		r[5] = 27;
-		r[5] = r[5] * 28;
-		r[5] = 29 + r[5];
-		r[5] = 30 * r[5];
-		r[5] = r[5] * 14;
-		r[5] = r[5] * 32;
-		r[2] = r[2] + r[5];
-		r[0] = 0;
+		temp = 27;
+		temp *= 28;
+		temp += 29;
+		temp *= 30;
+		temp *= 14;
+		temp *= 32;
+		n += temp;
 	}
 
-	r[1] = 1;
+	T sum = 0;
+	T i = 1;
 	do {
-		r[4] = 1;
+		T j = 1;
 		do {
-			r[5] = r[1] * r[4];
-			r[5] = r[5] == r[2];
+			if ((i * j) == n) sum += i;
+			j++;
+		} while (j <= n);
+		i++;
+	} while (i <= n);
 
-			if (r[5]) r[0] = r[1] + r[0];
-
-			r[4] = r[4] + 1;
-			r[5] = r[4] > r[2];
-
-		} while (!r[5]);
-		r[1] = r[1] + 1;
-		r[5] = r[1] > r[2];
-
-	} while (!r[5]);
-
-	return r[0];
+	return sum;
 }
 
