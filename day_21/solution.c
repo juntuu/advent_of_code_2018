@@ -1,14 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef unsigned long T;
 typedef struct {
 	T data[6];
 } Registers;
 
-#ifdef TRACE_RUN
-#define TRACE(x) { printf("%lu\n", x); exit(0); }
-#else
+#ifdef TRACE_RUN/*{{{*/
+#ifndef SEEN_LOW
+/* the last one is hit at 0x2cb9 */
+#define SEEN_LOW 0
+#endif
+#define TRACE(x) { if (not_seen(x) && seen > SEEN_LOW) BIT_PRINT(x); }
+static char *nibbles[] = {
+	"0000", "0001", "0010", "0011",
+	"0100", "0101", "0110", "0111",
+	"1000", "1001", "1010", "1011",
+	"1100", "1101", "1110", "1111",
+};
+
+#define BS(x) nibbles[((x) >> 4) & 0xf], nibbles[(x) & 0xf]
+#define BIT_PRINT(x) printf("%8lx: %s%s %s%s %s%s => %10lu\n", \
+		seen, BS(x >> 16), BS(x >> 8), BS(x & 0xff), x)
+
+T seen = 0;
+int not_seen(T v) {
+	static char s[1 << 21] = {};
+	int i = v >> 3;
+	int b = v & 0b111;
+	int new = 0 == (s[i] & (1 << b));
+	s[i] |= (1 << b);
+	seen += new;
+	return new;
+}
+#else/*}}}*/
 #define TRACE(x)
 #endif
 
@@ -238,6 +264,12 @@ int main(int argc, char **argv) {/*{{{*/
 
 	Registers r = {};
 	T r0 = 3941014;
+	r.data[0] = r0;
+	run(p, &r);
+	printf("Day 21, part 1: %lu\n", r0);
+
+	memset(r.data, 0, sizeof(r.data));
+	r0 = 13775890;
 	r.data[0] = r0;
 	run(p, &r);
 	printf("Day 21, part 1: %lu\n", r0);
