@@ -24,15 +24,9 @@ T program(T *r) {
 	}
 
 	T sum = 0;
-	T i = 1;
-	do {
-		T j = 1;
-		do {
-			if ((i * j) == n) sum += i;
-			j++;
-		} while (j <= n);
-		i++;
-	} while (i <= n);
+	for (T i = 1; i <= n; i++)
+		if ((n % i) == 0)
+			sum += i;
 
 	return sum;
 }
