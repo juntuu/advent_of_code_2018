@@ -5,6 +5,20 @@ class Unit(str):
 	ap = 3
 
 
+class Elf(str):
+	hp = 200
+
+	def __new__(cls, ap):
+		e = super().__new__(cls, 'E')
+		e.ap = ap
+		return e
+
+	def __setattr__(self, key, val):
+		if key == 'hp':
+			assert val > 0
+		super().__setattr__(key, val)
+
+
 def print_world(world, header='------', overlay={}):
 	print(header)
 	for i, line in enumerate(world):
@@ -110,4 +124,40 @@ with open('input.txt') as f:
 
 world = [[Unit(c) if c in 'EG' else c for c in line.strip()] for line in raw.splitlines()]
 print('Day 15, part 1:', battle(world, quiet=True))
+
+
+def create_world(raw, elf_attack):
+	world = []
+	for line in raw.splitlines():
+		world.append([])
+		for c in line.strip():
+			if c == 'E':
+				world[-1].append(Elf(elf_attack))
+			elif c == 'G':
+				world[-1].append(Unit(c))
+			else:
+				world[-1].append(c)
+	return world
+
+
+def try_power(i):
+	world = create_world(raw, i)
+	try:
+		return battle(world, quiet=True)
+	except AssertionError:
+		return None
+
+
+lo, hi = 4, 200
+while True:
+	mid = (hi + lo) // 2
+	res = try_power(mid)
+	if res is None:
+		lo = mid + 1
+	elif lo == hi:
+		break
+	else:
+		hi = mid
+
+print('Day 15, part 2:', res)
 
