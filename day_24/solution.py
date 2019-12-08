@@ -2,6 +2,7 @@
 import sys
 from dataclasses import dataclass
 from typing import FrozenSet, Optional
+from copy import deepcopy
 
 
 @dataclass
@@ -93,12 +94,17 @@ def battle(groups):
 					targets[g.army].remove(e)
 					break
 
+		kills = 0
 		for g in sorted(groups, key=lambda g: g.initiative, reverse=True):
 			if g.dead:
 				continue
 			if g.target:
-				g.target.units -= g.damage_to(g.target) // g.target.hp
+				killed = g.damage_to(g.target) // g.target.hp
+				g.target.units -= killed
+				kills += killed
 			g.target = None
+		if not kills:
+			break
 		groups = [g for g in groups if not g.dead]
 	return {a: sum(g.units for g in groups if g.army == a) for a in armies}
 
@@ -108,6 +114,28 @@ if len(sys.argv) > 1:
 else:
 	units = parse('input.txt')
 
-res = battle(units)
+res = battle(deepcopy(units))
 print('Day 24, part 1:', max(res.values()))
+
+
+def boosted_battle(groups, **boosts):
+	for g in groups:
+		g.damage += boosts.get(g.army, 0)
+	return battle(groups)
+
+
+lo, hi = 1, None
+while hi is None or lo < hi:
+	if hi:
+		boost = (lo + hi) // 2 + 1
+	else:
+		boost = lo * 2
+	res = boosted_battle(deepcopy(units), **{'Immune System': boost})
+	if res['Infection']:
+		lo = boost + 1
+	else:
+		hi = boost
+		final = res
+
+print('Day 24, part 2:', final['Immune System'])
 
