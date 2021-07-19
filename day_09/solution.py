@@ -2,7 +2,7 @@ from collections import Counter
 
 
 class List:
-	__slots__ = ('value', 'next', 'prev')
+	__slots__ = ("value", "next", "prev")
 
 	def __init__(self, v, n=None, p=None):
 		self.value = v
@@ -21,13 +21,13 @@ class List:
 		return self
 
 	def to_str(self, current=None):
-		res = ''
+		res = ""
 		at = self
 		while True:
 			if at is current:
-				res += f'({at.value:2})'
+				res += f"({at.value:2})"
 			else:
-				res += f'{at.value:3} '
+				res += f"{at.value:3} "
 			at = at.next
 			if at is self:
 				break
@@ -35,7 +35,7 @@ class List:
 
 
 def high_score(players, last_marble):
-	'''
+	"""
 	10 players; last marble is worth 1618 points: high score is 8317
 	13 players; last marble is worth 7999 points: high score is 146373
 	17 players; last marble is worth 1104 points: high score is 2764
@@ -53,7 +53,7 @@ def high_score(players, last_marble):
 	37305
 	>>> high_score(9, 25)
 	32
-	'''
+	"""
 	scores = Counter()
 	marbles = List(0)
 	current = marbles
@@ -70,10 +70,9 @@ def high_score(players, last_marble):
 
 
 # input
-'441 players; last marble is worth 71032 points'
+"441 players; last marble is worth 71032 points"
 players, last_marble = 441, 71032
 
-print('Day 9, part 1:', high_score(players, last_marble))
+print("Day 9, part 1:", high_score(players, last_marble))
 
-print('Day 9, part 2:', high_score(players, last_marble * 100))
-
+print("Day 9, part 2:", high_score(players, last_marble * 100))

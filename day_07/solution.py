@@ -1,8 +1,7 @@
-
 from collections import defaultdict
 from copy import deepcopy
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	edges = [(field[1], field[7]) for field in map(str.split, f)]
 
 steps = set(sum(edges, tuple()))
@@ -12,7 +11,7 @@ for a, b in edges:
 
 copy = deepcopy(todo)
 
-done = ''
+done = ""
 while todo:
 	step, *rest = sorted(s for s, pre in todo.items() if not pre)
 	todo.pop(step)
@@ -20,7 +19,7 @@ while todo:
 		s.discard(step)
 	done += step
 
-print('Day 7, part 1:', done)
+print("Day 7, part 1:", done)
 
 todo = copy
 workers = 1 + 5
@@ -41,5 +40,4 @@ while todo:
 		todo.pop(step)
 	second += 1
 
-print('Day 7, part 2:', max(free))
-
+print("Day 7, part 2:", max(free))

@@ -1,7 +1,6 @@
-
 from collections import Counter
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	ids = [line.strip() for line in f]
 
 
@@ -18,7 +17,7 @@ for two, three in map(counts, ids):
 	threes += three
 
 checksum = twos * threes
-print('Day 2, part 2:', checksum)
+print("Day 2, part 2:", checksum)
 
 
 def similar(needle, haystack, differences=1):
@@ -31,7 +30,6 @@ def similar(needle, haystack, differences=1):
 for i, line in enumerate(ids):
 	other = similar(line, ids[i:])
 	if other:
-		letters = ''.join(c for i, c in enumerate(line) if other[i] == c)
-		print('Day 2, part 2:', letters)
+		letters = "".join(c for i, c in enumerate(line) if other[i] == c)
+		print("Day 2, part 2:", letters)
 		break
-

@@ -1,9 +1,8 @@
-
 def polymerise(string):
 	return [ord(c.upper()) * [-1, 1][c.isupper()] for c in string]
 
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	polymer = polymerise(f.read().strip())
 
 # polymer = polymerise('dabAcCaCBAcCcaDA')
@@ -15,7 +14,7 @@ def react(polymer):
 	while reacted:
 		reacted = False
 		while i < len(polymer):
-			if i > 0 and polymer[i] + polymer[i-1] == 0:
+			if i > 0 and polymer[i] + polymer[i - 1] == 0:
 				reacted = True
 				polymer.pop(i)
 				polymer.pop(i - 1)
@@ -26,8 +25,7 @@ def react(polymer):
 
 
 reacted = react(polymer)
-print('Day 5, part 1:', len(reacted))
-
+print("Day 5, part 1:", len(reacted))
 
 units = set(map(abs, reacted))
 record = len(reacted)
@@ -36,5 +34,4 @@ for unit in units:
 	if len(candidate) < record:
 		record = len(candidate)
 
-print('Day 5, part 2:', record)
-
+print("Day 5, part 2:", record)

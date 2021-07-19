@@ -1,8 +1,7 @@
-
 from collections import Counter
 
-with open('input.txt') as f:
-	points = [tuple(map(int, line.split(', '))) for line in f]
+with open("input.txt") as f:
+	points = [tuple(map(int, line.split(", "))) for line in f]
 
 # points = [(1, 1), (1, 6), (8, 3), (3, 4), (5, 5), (8, 9)]
 
@@ -24,7 +23,7 @@ for x in range(min(xs), max(xs) + 1):
 			space[p] = a
 
 point, count = Counter(space.values()).most_common(1)[0]
-print('Day 6, part 1:', count)
+print("Day 6, part 1:", count)
 
 
 # limit = 30  # for example data
@@ -42,5 +41,4 @@ for x in range(min(xs), max(xs) + 1):
 		else:
 			count += 1
 
-print('Day 6, part 2:', count)
-
+print("Day 6, part 2:", count)

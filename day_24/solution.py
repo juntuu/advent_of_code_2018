@@ -1,4 +1,3 @@
-
 import sys
 from dataclasses import dataclass
 from typing import FrozenSet, Optional
@@ -15,13 +14,16 @@ class Group:
 	attack: str
 	immunities: FrozenSet[str] = frozenset()
 	weaknesses: FrozenSet[str] = frozenset()
-	target: Optional['Group'] = None
+	target: Optional["Group"] = None
 
 	def __hash__(self):
 		return id(self)
 
 	def __lt__(self, x):
-		return (self.effective_power, self.initiative) < (x.effective_power, x.initiative)
+		return (self.effective_power, self.initiative) < (
+			x.effective_power,
+			x.initiative,
+		)
 
 	@property
 	def dead(self):
@@ -43,27 +45,28 @@ def parse_group(name, s):
 	n, *_, hp, _1, _2, s = s.split(maxsplit=7)
 	immune = []
 	weak = []
-	if s.startswith('('):
-		x, s = s.split(') ', maxsplit=1)
-		parts = x[1:].split('; ')
+	if s.startswith("("):
+		x, s = s.split(") ", maxsplit=1)
+		parts = x[1:].split("; ")
 		for p in parts:
 			p, _, x = p.split(maxsplit=2)
-			if p.startswith('weak'):
-				weak.extend(x.split(', '))
-			elif p.startswith('immune'):
-				immune.extend(x.split(', '))
+			if p.startswith("weak"):
+				weak.extend(x.split(", "))
+			elif p.startswith("immune"):
+				immune.extend(x.split(", "))
 
 	*_, d, t, s = s.split(maxsplit=7)
 	*_, i = s.split()
 	return Group(
-			army=name,
-			initiative=int(i),
-			units=int(n),
-			hp=int(hp),
-			damage=int(d),
-			attack=t,
-			immunities=frozenset(immune),
-			weaknesses=frozenset(weak))
+		army=name,
+		initiative=int(i),
+		units=int(n),
+		hp=int(hp),
+		damage=int(d),
+		attack=t,
+		immunities=frozenset(immune),
+		weaknesses=frozenset(weak),
+	)
 
 
 def parse(filename):
@@ -74,7 +77,7 @@ def parse(filename):
 			if line.isspace():
 				name = None
 			elif name is None:
-				name = line.strip(':\n')
+				name = line.strip(":\n")
 			else:
 				units.append(parse_group(name, line))
 	return units
@@ -83,12 +86,11 @@ def parse(filename):
 def battle(groups):
 	armies = {u.army for u in units}
 	while all(any(u.army == army for u in groups) for army in armies):
-		targets = {
-				a: {t for t in groups if t.army != a}
-				for a in armies
-				}
+		targets = {a: {t for t in groups if t.army != a} for a in armies}
 		for g in sorted(groups, reverse=True):
-			for e in sorted(targets[g.army], key=lambda e: (g.damage_to(e), e), reverse=True):
+			for e in sorted(
+				targets[g.army], key=lambda e: (g.damage_to(e), e), reverse=True
+			):
 				if g.damage_to(e) > 0:
 					g.target = e
 					targets[g.army].remove(e)
@@ -112,10 +114,10 @@ def battle(groups):
 if len(sys.argv) > 1:
 	units = parse(sys.argv[1])
 else:
-	units = parse('input.txt')
+	units = parse("input.txt")
 
 res = battle(deepcopy(units))
-print('Day 24, part 1:', max(res.values()))
+print("Day 24, part 1:", max(res.values()))
 
 
 def boosted_battle(groups, **boosts):
@@ -130,12 +132,11 @@ while hi is None or lo < hi:
 		boost = (lo + hi) // 2 + 1
 	else:
 		boost = lo * 2
-	res = boosted_battle(deepcopy(units), **{'Immune System': boost})
-	if res['Infection']:
+	res = boosted_battle(deepcopy(units), **{"Immune System": boost})
+	if res["Infection"]:
 		lo = boost + 1
 	else:
 		hi = boost
 		final = res
 
-print('Day 24, part 2:', final['Immune System'])
-
+print("Day 24, part 2:", final["Immune System"])

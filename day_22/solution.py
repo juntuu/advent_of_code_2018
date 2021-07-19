@@ -1,4 +1,3 @@
-
 from collections import namedtuple, defaultdict
 import math
 import heapq
@@ -56,7 +55,7 @@ class PriorityQ:
 			if item in self.set:
 				self.set.discard(item)
 				return item
-		raise KeyError('pop from an empty queue')
+		raise KeyError("pop from an empty queue")
 
 	def push(self, item):
 		self.set.add(item)
@@ -98,9 +97,9 @@ y = 715
 
 geo_map = GeoMap(depth, (x, y))
 
-Node = namedtuple('Node', ['x', 'y', 'gear'])
-start = Node(0, 0, 'torch')
-goal = Node(x, y, 'torch')
+Node = namedtuple("Node", ["x", "y", "gear"])
+start = Node(0, 0, "torch")
+goal = Node(x, y, "torch")
 
 
 def heuristic(node):
@@ -108,10 +107,10 @@ def heuristic(node):
 
 
 def neighbors(node):
-	valid_gear = ['torch', 'climbing', 'neither', 'torch']
+	valid_gear = ["torch", "climbing", "neither", "torch"]
 	x, y, gear = node
 	region = geo_map[x, y]
-	for tool in valid_gear[region:region+2]:
+	for tool in valid_gear[region : region + 2]:
 		if tool != gear:
 			yield node._replace(gear=tool), 7
 	for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
@@ -119,24 +118,24 @@ def neighbors(node):
 		if xi < 0 or yi < 0:
 			continue
 		region = geo_map[xi, yi]
-		if gear in valid_gear[region:region+2]:
+		if gear in valid_gear[region : region + 2]:
 			yield Node(xi, yi, gear), 1
 
 
 def print_path(path):
 	grid = geo_map.as_grid()
 	chars = {
-			0: ' .',
-			1: ' =',
-			2: ' |',
-			'torch': 'T',
-			'climbing': 'C',
-			'neither': 'N',
-			}
+		0: " .",
+		1: " =",
+		2: " |",
+		"torch": "T",
+		"climbing": "C",
+		"neither": "N",
+	}
 	for yi in range(len(grid)):
 		for xi in range(len(grid[0])):
 			grid[yi][xi] = list(chars[grid[yi][xi]])
-	grid[0][0].append('S')
+	grid[0][0].append("S")
 
 	max_x = max_y = 0
 	for xi, yi, tool in path:
@@ -144,17 +143,16 @@ def print_path(path):
 		max_y = max(max_y, yi)
 		grid[yi][xi].append(chars[tool])
 
-	grid[y][x].append('G')
-	for row in grid[:max_y+1]:
-		print(''.join(''.join(e[-2:]) for e in row[:max_x+1]))
+	grid[y][x].append("G")
+	for row in grid[: max_y + 1]:
+		print("".join("".join(e[-2:]) for e in row[: max_x + 1]))
 
 
 total = sum(geo_map[i, j] for i in range(x + 1) for j in range(y + 1))
 cost, path = a_star(start, goal, heuristic, neighbors)
 
-if '--path' in sys.argv:
+if "--path" in sys.argv:
 	print_path(path)
 
 print("Day 22, part 1: ", total)
 print("Day 22, part 2: ", cost)
-

@@ -1,4 +1,3 @@
-
 from itertools import cycle
 
 
@@ -9,22 +8,22 @@ class Collision(Exception):
 
 	def __repr__(self):
 		y, x = self.pos
-		return f'Collision at: {x}{y}'
+		return f"Collision at: {x}{y}"
 
 
 class Cart:
 	positions = {}
-	turn = '<v>^<^'
+	turn = "<v>^<^"
 	corner = {
-			'</': 'v',
-			'^/': '>',
-			'>/': '^',
-			'v/': '<',
-			'<\\': '^',
-			'^\\': '<',
-			'>\\': 'v',
-			'v\\': '>',
-			}
+		"</": "v",
+		"^/": ">",
+		">/": "^",
+		"v/": "<",
+		"<\\": "^",
+		"^\\": "<",
+		">\\": "v",
+		"v\\": ">",
+	}
 
 	def __init__(self, x, y, direction):
 		self.turns = cycle((1, 0, -1))
@@ -34,20 +33,20 @@ class Cart:
 		Cart.positions[self.position] = self
 
 	def __repr__(self):
-		return f'Cart({self.c}, {self.position})'
+		return f"Cart({self.c}, {self.position})"
 
 	def advance(self, track):
 		Cart.positions.pop(self.position, None)
-		if self.c == '<':
+		if self.c == "<":
 			self.x -= 1
-		elif self.c == '>':
+		elif self.c == ">":
 			self.x += 1
-		elif self.c == '^':
+		elif self.c == "^":
 			self.y -= 1
-		elif self.c == 'v':
+		elif self.c == "v":
 			self.y += 1
 		at = track.get(self.position)
-		if at == '+':
+		if at == "+":
 			self.c = Cart.turn[Cart.turn.find(self.c) + next(self.turns)]
 		elif at:
 			self.c = Cart.corner[self.c + at]
@@ -67,15 +66,15 @@ class Cart:
 		return (y1, x1) < (y2, x2)
 
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	track = {}
 	carts = []
 	for y, row in enumerate(f):
 		for x, c in enumerate(row):
-			if c in '<>^v':
+			if c in "<>^v":
 				carts.append(Cart(x, y, c))
 				continue
-			elif c in r'\/+':
+			elif c in r"\/+":
 				track[(y, x)] = c
 
 
@@ -83,7 +82,7 @@ first = True
 while carts:
 	if len(carts) == 1:
 		y, x = carts[0].position
-		print(f'Day 13, part 2: {x},{y}')
+		print(f"Day 13, part 2: {x},{y}")
 		break
 	carts.sort()
 	i = 0
@@ -99,6 +98,5 @@ while carts:
 					i -= 1
 				carts.pop(j)
 			if first:
-				print(f'Day 13, part 1: {x},{y}')
+				print(f"Day 13, part 1: {x},{y}")
 				first = False
-

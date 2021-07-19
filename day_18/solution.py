@@ -1,9 +1,8 @@
-
 import curses
 import time
 from collections import Counter
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	yard = [row.strip() for row in f]
 
 
@@ -19,25 +18,25 @@ def adjacent(yard, x0, y0):
 
 
 def step(yard):
-	'''
+	"""
 	. -> | if | >= 3
 	| -> # if # >= 3
 	# -> . if # == 0 or | == 0
-	'''
+	"""
 	new_yard = []
 	for y, row in enumerate(yard):
-		new_yard.append('')
+		new_yard.append("")
 		for x, current in enumerate(row):
 			counts = adjacent(yard, x, y)
-			if current == '.':
-				if counts['|'] >= 3:
-					current = '|'
-			elif current == '|':
-				if counts['#'] >= 3:
-					current = '#'
-			elif current == '#':
-				if counts['#'] == 0 or counts['|'] == 0:
-					current = '.'
+			if current == ".":
+				if counts["|"] >= 3:
+					current = "|"
+			elif current == "|":
+				if counts["#"] >= 3:
+					current = "#"
+			elif current == "#":
+				if counts["#"] == 0 or counts["|"] == 0:
+					current = "."
 			new_yard[-1] += current
 	return new_yard
 
@@ -49,8 +48,8 @@ value_at_more_minutes = None
 
 
 def value(yard):
-	counts = Counter(''.join(yard))
-	return counts['#'] * counts['|']
+	counts = Counter("".join(yard))
+	return counts["#"] * counts["|"]
 
 
 def vis(scr):
@@ -63,10 +62,10 @@ def vis(scr):
 	cl = [0]
 	values = []
 	for minute in range(more_minutes + 1):
-		s = ''.join(yard)
+		s = "".join(yard)
 		if n[s] > max_n:
 			if len(cl) > 1 and cl[-1] == cl[-2]:
-				values = values[-cl[-1]:]
+				values = values[-cl[-1] :]
 				diff = more_minutes - minute
 				value_at_more_minutes = values[diff % len(values)]
 			max_n = n[s]
@@ -82,21 +81,25 @@ def vis(scr):
 			time.sleep(0.2)
 		if minute % 4 == 0 or minute < minutes or n.most_common(1)[0][1] > 1:
 			scr.clear()
-			scr.addstr(0, 0, f'After {minute:2} minute{"" if minute == 1 else "s"}: value = {value(yard)}, cycle lengths = {cl}')
+			scr.addstr(
+				0,
+				0,
+				f'After {minute:2} minute{"" if minute == 1 else "s"}: value = {value(yard)}, cycle lengths = {cl}',
+			)
 			for i, row in enumerate(yard):
 				if i + 1 >= curses.LINES:
 					break
-				scr.addstr(i + 1, 0, row[:curses.COLS])
+				scr.addstr(i + 1, 0, row[: curses.COLS])
 			scr.refresh()
 
 		if value_at_more_minutes is not None:
-			s1 = f'found value at {more_minutes}: {value_at_more_minutes}'
-			s2 = 'press any key to exit'
+			s1 = f"found value at {more_minutes}: {value_at_more_minutes}"
+			s2 = "press any key to exit"
 			length = max(len(s1), len(s2))
-			scr.addstr(1, 0, f'{s1.ljust(length)} *  ')
-			scr.addstr(2, 0, f'{s2.ljust(length)} *  ')
-			scr.addstr(3, 0, '*' * length + '**  ')
-			scr.addstr(4, 0, ' ' * length + '    ')
+			scr.addstr(1, 0, f"{s1.ljust(length)} *  ")
+			scr.addstr(2, 0, f"{s2.ljust(length)} *  ")
+			scr.addstr(3, 0, "*" * length + "**  ")
+			scr.addstr(4, 0, " " * length + "    ")
 			scr.refresh()
 			scr.getkey()
 			break
@@ -110,7 +113,6 @@ except KeyboardInterrupt:
 	pass
 
 if value_at_minutes is not None:
-	print('Day 18, part 1:', value_at_minutes)
+	print("Day 18, part 1:", value_at_minutes)
 if value_at_more_minutes is not None:
-	print('Day 18, part 2:', value_at_more_minutes)
-
+	print("Day 18, part 2:", value_at_more_minutes)

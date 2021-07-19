@@ -1,16 +1,15 @@
-
 from datetime import datetime
 from collections import defaultdict, Counter
 
 
 def parse_event(line):
-	time, event = line.split(']', 1)
+	time, event = line.split("]", 1)
 	time = datetime.fromisoformat(time[1:])
 	event = event.split()[1]  # up/asleep/#{id}
 	return (time, event)
 
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	events = sorted(parse_event(line) for line in f)
 
 
@@ -18,15 +17,15 @@ sleeping_guards = defaultdict(list)
 on_duty = None
 sleep_start = None
 for time, event in events:
-	if event.startswith('#'):
+	if event.startswith("#"):
 		on_duty = int(event[1:])
-	elif event == 'asleep':
+	elif event == "asleep":
 		sleep_start = time.minute
-	elif event == 'up':
+	elif event == "up":
 		assert sleep_start is not None
 		sleeping_guards[on_duty].append(range(sleep_start, time.minute))
 	else:
-		raise ValueError(f'unknown event: {event}')
+		raise ValueError(f"unknown event: {event}")
 
 most_sleepy = (0, 0)
 for guard, sleep in sleeping_guards.items():
@@ -41,7 +40,7 @@ for nap in sleeping_beauty:
 
 minute, _ = histogram.most_common(1)[0]
 
-print('Day 4, part 1:', minute * most_sleepy[1])
+print("Day 4, part 1:", minute * most_sleepy[1])
 
 
 histogram = Counter()
@@ -49,5 +48,4 @@ for guard, sleep in sleeping_guards.items():
 	histogram.update((guard, minute) for nap in sleep for minute in nap)
 
 (guard, minute), _ = histogram.most_common(1)[0]
-print('Day 4, part 2:', minute * guard)
-
+print("Day 4, part 2:", minute * guard)

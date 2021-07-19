@@ -1,11 +1,10 @@
-
 from collections import namedtuple, Counter
 
-with open('input.txt') as f:
+with open("input.txt") as f:
 	license = list(map(int, f.read().split()))
 
 
-Node = namedtuple('Node', ['children', 'metadata'])
+Node = namedtuple("Node", ["children", "metadata"])
 
 
 def parse(license):
@@ -25,7 +24,7 @@ def tree_sum(node):
 tree, rest = parse(license)
 assert rest == []
 
-print('Day 8, part 1:', tree_sum(tree))
+print("Day 8, part 1:", tree_sum(tree))
 
 
 def tree_value(node):
@@ -34,10 +33,10 @@ def tree_value(node):
 		return sum(meta)
 	counts = Counter(meta)
 	return sum(
-			tree_value(children[i-1]) * factor
-			for i, factor in counts.items()
-			if i-1 in range(len(children)))
+		tree_value(children[i - 1]) * factor
+		for i, factor in counts.items()
+		if i - 1 in range(len(children))
+	)
 
 
-print('Day 8, part 2:', tree_value(tree))
-
+print("Day 8, part 2:", tree_value(tree))

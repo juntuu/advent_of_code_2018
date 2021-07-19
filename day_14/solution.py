@@ -1,8 +1,7 @@
-
 puzzle_input = 846021
 limit = puzzle_input + 10
 
-scores = '37'
+scores = "37"
 elf_a = 0
 elf_b = 1
 
@@ -28,4 +27,3 @@ while pos < 0:
 	pos = scores.find(looking_for, i)
 
 print("Day 14, part 2:", pos)
-
