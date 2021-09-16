@@ -1,28 +1,25 @@
-from collections import namedtuple, defaultdict
-import math
 import heapq
 import sys
 
+from typing import NamedTuple, Callable, Iterable, TypeVar, Generic, Hashable
+
 
 class GeoMap:
-	def __init__(self, depth, target):
+	def __init__(self, depth: int, target: tuple[int, int]):
 		self.map = {(0, 0): 0, target: 0}
 		self.depth = depth
 		self.target = target
 		self.max_x, self.max_y = target
 
-	def __getitem__(self, i):
+	def __getitem__(self, i: tuple[int, int]):
 		return self.erosion(i) % 3
 
 	def as_grid(self):
-		grid = []
-		for y in range(self.max_y + 1):
-			grid.append([])
-			for x in range(self.max_x + 1):
-				grid[-1].append(self[x, y])
-		return grid
+		return [
+			[self[x, y] for x in range(self.max_x + 1)] for y in range(self.max_y + 1)
+		]
 
-	def erosion(self, i):
+	def erosion(self, i: tuple[int, int]):
 		if i not in self.map:
 			x, y = i
 			self.max_x = max(x, self.max_x)
@@ -36,11 +33,15 @@ class GeoMap:
 		return (self.map[i] + self.depth) % 20183
 
 
-class PriorityQ:
-	def __init__(self, it, *, key=lambda x: x):
+T = TypeVar("T", bound=Hashable)
+K = TypeVar("K")
+
+
+class PriorityQ(Generic[T, K]):
+	def __init__(self, it: Iterable[T], *, key: Callable[[T], K]):
 		self.set = set(it)
 		self.key = key
-		self.list = list((key(e), e) for e in self.set)
+		self.list = [(key(e), e) for e in self.set]
 		heapq.heapify(self.list)
 
 	def __bool__(self):
@@ -53,26 +54,34 @@ class PriorityQ:
 		while self.set:
 			item = heapq.heappop(self.list)[1]
 			if item in self.set:
-				self.set.discard(item)
+				self.set.remove(item)
 				return item
 		raise KeyError("pop from an empty queue")
 
-	def push(self, item):
+	def push(self, item: T):
 		self.set.add(item)
 		heapq.heappush(self.list, (self.key(item), item))
 
 
+class Node(NamedTuple):
+	x: int
+	y: int
+	gear: str
+
+
 # A* from wikipedia:
 # see https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-def a_star(start, goal, h, neighbors):
-	came_from = {}
-	g_score = defaultdict(lambda: math.inf)
-	g_score[start] = 0
+def a_star(
+	start: T,
+	goal: T,
+	h: Callable[[T], int],
+	edges: Callable[[T], Iterable[tuple[T, int]]],
+):
+	came_from: dict[T, T] = {}
+	g_score = {start: 0}
+	f_score = {start: h(start)}
 
-	f_score = defaultdict(lambda: math.inf)
-	f_score[start] = h(start)
-
-	open_set = PriorityQ([start], key=lambda p: f_score[p])
+	open_set = PriorityQ([start], key=f_score.__getitem__)
 	while open_set:
 		current = open_set.pop()
 		if current == goal:
@@ -82,31 +91,22 @@ def a_star(start, goal, h, neighbors):
 				path.append(current)
 			return g_score[goal], reversed(path)
 
-		for neighbor, distance in neighbors(current):
-			tentative_g_score = g_score[current] + distance
-			if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+		current_score = g_score[current]
+		for neighbor, distance in edges(current):
+			tentative_g_score = current_score + distance
+			if tentative_g_score < g_score.get(neighbor, tentative_g_score + 1):
 				came_from[neighbor] = current
 				g_score[neighbor] = tentative_g_score
-				f_score[neighbor] = g_score[neighbor] + h(neighbor)
+				f_score[neighbor] = tentative_g_score + h(neighbor)
 				open_set.push(neighbor)
+	assert False, "no path"
 
 
-depth = 3339
-x = 10
-y = 715
-
-geo_map = GeoMap(depth, (x, y))
-
-Node = namedtuple("Node", ["x", "y", "gear"])
-start = Node(0, 0, "torch")
-goal = Node(x, y, "torch")
+def heuristic(node: Node):
+	return abs(node.x - x) + abs(node.y - y) + 7
 
 
-def heuristic(node):
-	return abs(node.x - goal.x) + abs(node.y - goal.y) + 7
-
-
-def neighbors(node):
+def neighbors(node: Node):
 	valid_gear = ["torch", "climbing", "neither", "torch"]
 	x, y, gear = node
 	region = geo_map[x, y]
@@ -123,7 +123,6 @@ def neighbors(node):
 
 
 def print_path(path):
-	grid = geo_map.as_grid()
 	chars = {
 		0: " .",
 		1: " =",
@@ -132,9 +131,7 @@ def print_path(path):
 		"climbing": "C",
 		"neither": "N",
 	}
-	for yi in range(len(grid)):
-		for xi in range(len(grid[0])):
-			grid[yi][xi] = list(chars[grid[yi][xi]])
+	grid = [[list(chars[c]) for c in row] for row in geo_map.as_grid()]
 	grid[0][0].append("S")
 
 	max_x = max_y = 0
@@ -148,11 +145,15 @@ def print_path(path):
 		print("".join("".join(e[-2:]) for e in row[: max_x + 1]))
 
 
-total = sum(geo_map[i, j] for i in range(x + 1) for j in range(y + 1))
-cost, path = a_star(start, goal, heuristic, neighbors)
+x = 10
+y = 715
 
+geo_map = GeoMap(3339, (x, y))
+
+total = sum(geo_map[i, j] for i in range(x + 1) for j in range(y + 1))
+print("Day 22, part 1: ", total)
+
+cost, path = a_star(Node(0, 0, "torch"), Node(x, y, "torch"), heuristic, neighbors)
 if "--path" in sys.argv:
 	print_path(path)
-
-print("Day 22, part 1: ", total)
 print("Day 22, part 2: ", cost)

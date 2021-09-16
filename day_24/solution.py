@@ -1,6 +1,6 @@
 import sys
 from dataclasses import dataclass
-from typing import FrozenSet, Optional
+from typing import Optional
 from copy import deepcopy
 
 
@@ -12,8 +12,8 @@ class Group:
 	hp: int
 	damage: int
 	attack: str
-	immunities: FrozenSet[str] = frozenset()
-	weaknesses: FrozenSet[str] = frozenset()
+	immunities: frozenset[str] = frozenset()
+	weaknesses: frozenset[str] = frozenset()
 	target: Optional["Group"] = None
 
 	def __hash__(self):
@@ -69,8 +69,8 @@ def parse_group(name, s):
 	)
 
 
-def parse(filename):
-	units = []
+def parse(filename: str):
+	units: list[Group] = []
 	name = None
 	with open(filename) as f:
 		for line in f:
@@ -83,7 +83,7 @@ def parse(filename):
 	return units
 
 
-def battle(groups):
+def battle(groups: list[Group]):
 	armies = {u.army for u in units}
 	while all(any(u.army == army for u in groups) for army in armies):
 		targets = {a: {t for t in groups if t.army != a} for a in armies}
